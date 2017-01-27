@@ -4,7 +4,7 @@ var router = express.Router();
 
 var Company=require('../models/company');
 router.get('/', function(req, res, next) {	
-  res.send("Finance Api By Reejh Ghosh");
+  res.sendFile('instructions.txt');
 });
 
 router.post('/create',function(req,res){
@@ -28,7 +28,7 @@ router.get('/:sym',function(req,res){
 			res.send(com.company);
 			}
 		else if(com==null){
-			res.send("No info");
+			res.send("false");
 			}
 		else{
 			console.log(err);
@@ -41,7 +41,7 @@ router.get('/:sym/stockprice',function(req,res){
 		if(!err && com!=null){
 			res.send(com.company.stock_price);
 			}
-		else if(!com){
+		else if(com==null){
 			res.send("false");
 			}
 		else{
@@ -91,7 +91,6 @@ router.put('/:sym/update/:field/:value',function(req,res){
 	Company.findOne({'company.symbol':req.params.sym},function(err,com){
 		if(!err && com!=null){
 			try {
-				console.log("HELLO");
 				if(com.company[req.params.field]!=undefined){
 				com.company[req.params.field]=req.params.value;
 				com.save(function(err,obj){
@@ -100,7 +99,7 @@ router.put('/:sym/update/:field/:value',function(req,res){
 						res.send("true");
 					}
 					else{
-						res.send(err);
+						res.send("error while update, please try again");
 					}
 				});
 				}
@@ -122,5 +121,22 @@ router.put('/:sym/update/:field/:value',function(req,res){
 	});
 });
 
+router.delete('/:sym',function(req,res){
+	Company.findOne({'company.symbol':req.params.sym},function(err,com){
+		if(!err && com!=null){
+			com.remove(function(error){
+				if(!err)
+				res.send("true");
+				else
+				res.send("false");
+				});
+			}
+			else if(com==null){
+				res.send("null");
+			}
+			else
+			res.send("error in search");
+		});
+});
 
 module.exports = router;
