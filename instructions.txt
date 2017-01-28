@@ -30,15 +30,20 @@ HEAD OVER TO http://localhost:3000
 REST API:
 
 GET    http://localhost:3000/  					[API usage help]
+GET    http://localhost:3000/get_schema				[sends a JSON sample schema which can be referred to while using /create]
 GET    http://localhost:3000/list_all  				[sends JSON object with all symbols available in DB]
 GET    http://localhost:3000/:symbol				[fetch all available financial information, returns "false" if symbol not in database]
-GET    http://localhost:3000/:symbol/stockprice			[fetch stockprice in all exchanges]
-GET    http://localhost:3000/:symbol/stockprice/:exchange	[fetch stockprice in ":exchange"]
+GET    http://localhost:3000/:symbol/stock_price		[fetch stockprice in all exchanges]
+GET    http://localhost:3000/:symbol/stock_price/:exchange	[fetch stockprice in ":exchange"]
 POST   http://localhost:3000/create				[create new entry in database> formatting
 								 set headers as:
 								 {"Content-Type":"application/json"}
 								 JSON in body, example:{"ceo":"Mukesh Ambani","sym":"RELIANCE","nse":"1,028.90","bse":"1,028.90"}	
 								]
 PUT    http://localhost:3000/:symbol/update/all			[update all entries in db for company with ":symbol"]
-PUT    http://localhost:3000/:symbol/update/:field/:value	[update entry for ":field" with ":value" for ":symbol"  for all fields except "stockprice"]
+PUT    http://localhost:3000/:symbol/update/:field/:value	[update entry for ":field" with ":value" for ":symbol"  for all fields except "stock_price"]
+PUT    http://localhost:3000/:symbol/update/:field		[NOTE: especially used for "stock_price" field 
+								set headers as:
+								{"Content-Type":"application/json"}
+								JSON in body, example: {"nse":"1200","bse":"3000"}]
 DELETE http://localhost:3000/:symbol  				[delete db entry for ":symbol"]

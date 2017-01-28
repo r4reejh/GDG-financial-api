@@ -5,7 +5,19 @@ var router = express.Router();
 var Company=require('../models/company');
 
 router.get('/', function(req, res, next) {	
+	////res.setHeader(200, {"Content-Type": "text/plain"});
   res.sendFile(__dirname+'/rest.txt');
+});
+
+router.get('/get_schema',function(req,res,next){
+	var schema={
+			sym: "<String>",
+			ceo: "<String>",
+			nse: "<String>",
+			bse: "<String>",
+		};
+	////res.setHeader(200, {"Content-Type": "application/json"});
+	res.send(schema);
 });
 router.get('/list_all',function(req,res){
 	var result={};
@@ -13,6 +25,7 @@ router.get('/list_all',function(req,res){
 		com.forEach(function(elem, index, array) {
 				result[index]=elem.company.symbol;
 		});
+		//res.setHeader(200, {"Content-Type": "application/json"});
 		res.send(result);
 	});
 });
@@ -26,7 +39,8 @@ router.post('/create',function(req,res){
 		c.save(function(err,obj){
 			if(!err){
 				console.log("done");
-				res.send("created");
+				//res.setHeader(200, {"Content-Type": "application/json"});
+				res.json({"message":"created"});
 				}
 			});
 });
@@ -34,41 +48,53 @@ router.post('/create',function(req,res){
 router.get('/:sym',function(req,res){
 	Company.findOne({'company.symbol':(req.params.sym).toUpperCase()},function(err,com){
 		if(!err && com!=null){
+			//res.setHeader(200, {"Content-Type": "application/json"});
 			res.send(com.company);
 			}
 		else if(com==null){
-			res.send("false");
+			//res.setHeader(404, {"Content-Type": "application/json"});
+			res.json({"message":"null"});
 			}
 		else{
 			console.log(err);
+			//res.setHeader(500, {"Content-Type": "application/json"});
+			res.json({"message":err});
 		}
 		});
 });
 
-router.get('/:sym/stockprice',function(req,res){
+router.get('/:sym/stock_price',function(req,res){
 	Company.findOne({'company.symbol':req.params.sym},function(err,com){
 		if(!err && com!=null){
+			//res.setHeader(200, {"Content-Type": "application/json"});
 			res.send(com.company.stock_price);
 			}
 		else if(com==null){
-			res.send("false");
+			//res.setHeader(404, {"Content-Type": "application/json"});
+			res.json({"message":"null"});
 			}
 		else{
 			console.log(err);
+			//res.setHeader(500, {"Content-Type": "application/json"});
+			res.json({"message":err});
 		}
 	});
 });
 	
-router.get('/:sym/stockprice/:exchange',function(req,res){
+router.get('/:sym/stock_price/:exchange',function(req,res){
 	Company.findOne({'company.symbol':req.params.sym},function(err,com){
 		if(!err && com){
+			//res.setHeader(200, {"Content-Type": "application/json"});
 			res.send(com.company.stock_price[req.params.exchange]);
 			}
 		else if(com==null){
-			res.send("false");
+			//res.setHeader(404, {"Content-Type": "application/json"});
+			res.json({"message":"null"});
 			}
 		else{
 			console.log(err);
+			//res.setHeader(500, {"Content-Type": "application/json"});
+			res.json({"message":err});
 		}
 	});
 });
@@ -82,14 +108,58 @@ router.put('/:sym/update/all',function(req,res){
 			com.save(function(err,obj){
 				if(!err){
 					console.log("done");
-					res.send("true");
+					//res.setHeader(200, {"Content-Type": "application/json"});
+					res.json({"message":"true"});
 				}
 			});
 			}
 		else if(com==null){
-			res.send("false");
+			//res.setHeader(404, {"Content-Type": "application/json"});
+			res.json({"message":"null"});
 			}
 		else{
+			console.log(err);
+			//res.setHeader(500, {"Content-Type": "application/json"});
+			res.json({"message":err});
+		}
+	});
+});
+
+router.put('/:sym/update/:field',function(req,res){
+	console.log("HELLO");
+	Company.findOne({'company.symbol':req.params.sym},function(err,com){
+		if(!err && com!=null){
+			try {
+				if(com.company[req.params.field]!=undefined){
+				com.company[req.params.field]=req.body;
+				com.save(function(err,obj){
+					if(!err){
+						console.log("done");
+						//res.setHeader(200, {"Content-Type": "application/json"});
+						res.json({"message":"true"});
+					}
+					else{
+						//res.setHeader(500, {"Content-Type": "application/json"});
+						res.json({"message":"error while update, please try again"});
+					}
+				});
+				}
+				else{
+					//res.setHeader(400, {"Content-Type": "application/json"});
+					res.json({"message":"incorrect command"});
+					}
+			}
+			catch(err){
+				res.json({"message":err});
+			}
+			
+		}
+		else if(com==null){
+			//res.setHeader(404, {"Content-Type": "application/json"});
+			res.json({"message":"false"});
+		}
+		else{
+			//res.setHeader(500, {"Content-Type": "application/json"});
 			console.log(err);
 		}
 	});
@@ -105,26 +175,32 @@ router.put('/:sym/update/:field/:value',function(req,res){
 				com.save(function(err,obj){
 					if(!err){
 						console.log("done");
-						res.send("true");
+						//res.setHeader(200, {"Content-Type": "application/json"});
+						res.json({"message":"true"});
 					}
 					else{
-						res.send("error while update, please try again");
+						//res.setHeader(500, {"Content-Type": "application/json"});
+						res.json({"message":"error while update, please try again"});
 					}
 				});
 				}
 				else{
-					res.send("incorrect command");
+					//res.setHeader(400, {"Content-Type": "application/json"});
+					res.json({"message":"incorrect command"});
 					}
 			}
 			catch(err){
-				res.send(err);
+				//res.setHeader(500, {"Content-Type": "application/json"});
+				res.json({"message":err});
 			}
 			
 		}
 		else if(com==null){
-			res.send("false");
+			//res.setHeader(404, {"Content-Type": "application/json"});
+			res.json({"message":"false"});
 		}
 		else{
+			//res.setHeader(500, {"Content-Type": "application/json"});
 			console.log(err);
 		}
 	});
@@ -134,18 +210,28 @@ router.delete('/:sym',function(req,res){
 	Company.findOne({'company.symbol':req.params.sym},function(err,com){
 		if(!err && com!=null){
 			com.remove(function(error){
-				if(!err)
-				res.send("true");
+				if(!err){
+					////res.setHeader(200, {"Content-Type": "application/json"});
+					res.json({"message":"true"});
+				}
 				else
-				res.send("false");
+				res.json({"message":"false"});
 				});
 			}
 			else if(com==null){
-				res.send("null");
+				////res.setHeader(404, {"Content-Type": "application/json"});
+				res.json({"message":"null"});
 			}
-			else
-			res.send("error in search");
+			else{
+				////res.setHeader(500, {"Content-Type": "application/json"});
+				res.json({"message":"error in search"});
+			}
 		});
+});
+
+router.use('*',function(req,res){
+	////res.setHeader(400, {"Content-Type": "application/json"});
+	res.json({"message":"invalid request"});
 });
 
 module.exports = router;
